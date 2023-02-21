@@ -1,0 +1,124 @@
+[gd_scene load_steps=5 format=2]
+
+[ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/menuButton.gd" type="Script" id=1]
+[ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/bottomBar.gd" type="Script" id=2]
+[ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/MenuButtonCol.gd" type="Script" id=3]
+[ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/MenuButtonRow.gd" type="Script" id=4]
+
+[node name="HBoxContainer2" type="HBoxContainer"]
+margin_top = 576.0
+margin_right = 1024.0
+margin_bottom = 600.0
+script = ExtResource( 2 )
+
+[node name="ButtonFromCSV" type="Control" parent="."]
+margin_bottom = 24.0
+
+[node name="FileDialog" type="FileDialog" parent="ButtonFromCSV"]
+margin_right = 520.0
+margin_bottom = 326.0
+window_title = "Open a File"
+mode = 0
+access = 2
+filters = PoolStringArray( "*.csv" )
+
+[node name="csvHeadings" type="WindowDialog" parent="ButtonFromCSV"]
+margin_left = 466.658
+margin_top = 158.0
+margin_right = 866.672
+margin_bottom = 232.0
+size_flags_horizontal = 3
+size_flags_vertical = 3
+resizable = true
+
+[node name="VBoxContainer" type="VBoxContainer" parent="ButtonFromCSV/csvHeadings"]
+anchor_top = 0.5
+anchor_right = 1.0
+anchor_bottom = 0.5
+margin_top = -19.0
+margin_bottom = 19.0
+
+[node name="Label" type="Label" parent="ButtonFromCSV/csvHeadings/VBoxContainer"]
+margin_right = 400.0
+margin_bottom = 14.0
+text = "Does the csv contain headings?"
+align = 1
+valign = 1
+
+[node name="HBoxContainer" type="HBoxContainer" parent="ButtonFromCSV/csvHeadings/VBoxContainer"]
+margin_top = 18.0
+margin_right = 400.0
+margin_bottom = 38.0
+alignment = 1
+
+[node name="ButtonYes" type="Button" parent="ButtonFromCSV/csvHeadings/VBoxContainer/HBoxContainer"]
+margin_left = 167.0
+margin_right = 201.0
+margin_bottom = 20.0
+text = "yes"
+
+[node name="ButtonNo" type="Button" parent="ButtonFromCSV/csvHeadings/VBoxContainer/HBoxContainer"]
+margin_left = 205.0
+margin_right = 233.0
+margin_bottom = 20.0
+text = "no"
+
+[node name="ButtonFile" type="MenuButton" parent="."]
+margin_left = 4.0
+margin_right = 59.0
+margin_bottom = 24.0
+text = "import"
+items = [ "csv", null, 0, false, false, 0, 0, null, "", false, "dict", null, 0, false, false, 1, 0, null, "", false ]
+script = ExtResource( 1 )
+
+[node name="ButtonUndo" type="Button" parent="."]
+margin_left = 63.0
+margin_right = 107.0
+margin_bottom = 24.0
+text = "undo"
+flat = true
+
+[node name="MenuButtonCol" type="MenuButton" parent="."]
+margin_left = 111.0
+margin_right = 171.0
+margin_bottom = 24.0
+text = "column"
+items = [ "insert column", null, 0, false, false, 0, 0, null, "", false, "delete column", null, 0, false, false, 1, 0, null, "", false, "move right", null, 0, false, false, 2, 0, null, "", false, "move left", null, 0, false, false, 3, 0, null, "", false ]
+script = ExtResource( 3 )
+
+[node name="MenuButtonRow" type="MenuButton" parent="."]
+margin_left = 175.0
+margin_right = 210.0
+margin_bottom = 24.0
+text = "row"
+items = [ "insert row", null, 0, false, false, 0, 0, null, "", false, "delete row", null, 0, false, false, 1, 0, null, "", false ]
+script = ExtResource( 4 )
+
+[node name="Button" type="Button" parent="."]
+visible = false
+margin_left = 210.0
+margin_right = 276.0
+margin_bottom = 24.0
+text = "serialize"
+
+[node name="ButtonSave" type="Button" parent="."]
+visible = false
+margin_left = 210.0
+margin_right = 251.0
+margin_bottom = 24.0
+text = "save"
+
+[node name="ButtonLoad" type="Button" parent="."]
+visible = false
+margin_left = 210.0
+margin_right = 249.0
+margin_bottom = 24.0
+text = "load"
+
+[connection signal="file_selected" from="ButtonFromCSV/FileDialog" to="." method="_on_FileDialog_file_selected"]
+[connection signal="pressed" from="ButtonFromCSV/csvHeadings/VBoxContainer/HBoxContainer/ButtonYes" to="." method="_on_ButtonYes_pressed"]
+[connection signal="pressed" from="ButtonFromCSV/csvHeadings/VBoxContainer/HBoxContainer/ButtonNo" to="." method="_on_ButtonNo_pressed"]
+[connection signal="pressed" from="ButtonUndo" to="." method="_on_ButtonUndo_pressed"]
+[connection signal="pressed" from="Button" to="." method="_on_Button_pressed"]
+[connection signal="pressed" from="ButtonSave" to="." method="_on_ButtonSave_pressed"]
+[connection signal="pressed" from="ButtonLoad" to="." method="_on_ButtonLoad_pressed"]
