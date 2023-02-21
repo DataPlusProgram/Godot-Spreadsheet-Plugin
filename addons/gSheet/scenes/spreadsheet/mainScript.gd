@@ -1113,7 +1113,9 @@ func CSVparse(file):
 		
 		
 		if line == "":
+			input = getLineAlt(file)
 			continue
+
 		var i = 0
 
 		while i < line.length():
@@ -1146,6 +1148,7 @@ func CSVparse(file):
 		data.append(row)
 		
 		input = getLineAlt(file)
+		
 			
 			
 	
