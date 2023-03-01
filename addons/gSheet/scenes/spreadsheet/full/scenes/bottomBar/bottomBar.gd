@@ -1,10 +1,16 @@
 tool
 extends HBoxContainer
 
-onready var sheet = $"../../HBoxContainer/Spreadsheet/Control"
+var sheet : Node
+
 func _on_Save_pressed():
 	sheetGlobal.saveNodeAsScene(get_parent())
 
+
+
+func _ready():
+	if get_node_or_null("../../HBoxContainer/Spreadsheet/Control") != null:
+		sheet = $"../../HBoxContainer/Spreadsheet/Control"
 
 func _on_ButtonFromArray_pressed():
 	var t : WindowDialog= $"../../DataFromText" 
@@ -14,7 +20,20 @@ func _on_ButtonFromArray_pressed():
 var csvPath = ""
 
 func _on_FileDialog_file_selected(path):
-	$ButtonFromCSV/csvHeadings.popup_centered()
+	#$ButtonFromCSV/csvHeadings.popup_centered()
+	$ButtonFromCSV/csvOptions.popup_centered()
+	
+	var file = File.new()
+	file.open(path,File.READ)
+	var content = file.get_as_text()
+	var countA = content.count(",")
+	var countB = content.count(";")
+	
+	if countA > countB:
+		$ButtonFromCSV/csvOptions/VBoxContainer/Delimeter/OptionButton.selected = 0
+	else:
+		$ButtonFromCSV/csvOptions/VBoxContainer/Delimeter/OptionButton.selected = 1
+	
 	csvPath = path
 	
 
@@ -24,13 +43,29 @@ func _on_ButtonFromCSV_pressed():
 
 
 func _on_ButtonSave_pressed():
+	var dialog = FileDialog.new()
+	dialog.filters = ["*.tres"]
+	dialog.access = FileDialog.ACCESS_FILESYSTEM
+	dialog.mode = FileDialog.MODE_SAVE_FILE
+	dialog.current_path = $"../../Label".text
+	#dialog.current_path = $"../../../Label".text
+	add_child(dialog)
+	var e  = dialog.connect("file_selected",self,"saveSheet")
+	dialog.rect_size =  Vector2(600,600)
+	dialog.popup_centered_ratio()
+	
+	#var data = sheet.serializeData()
+	#var res = load("res://addons/gSheet/scenes/gsheet.gd").new()
+	#res.data = data
+#	ResourceSaver.save("res://dbg/savedFormat2.tres",res)
+	
+	#sheetGlobal.saveNodeAsScene(self,"res://dbg/sScen.tscn")
+
+func saveSheet(string):
 	var data = sheet.serializeData()
 	var res = load("res://addons/gSheet/scenes/gsheet.gd").new()
 	res.data = data
-	ResourceSaver.save("res://dbg/savedFormat2.tres",res)
-	
-	sheetGlobal.saveNodeAsScene(self,"res://dbg/sScen.tscn")
-
+	ResourceSaver.save(string,res)
 
 func _on_ButtonLoad_pressed():
 	sheet.loadFromFile("res://dbg/savedFormat2.tres")
@@ -67,15 +102,20 @@ func _on_ButtonUndo_pressed():
 
 func _on_Button_pressed():
 	sheet.serializeData()
+
+
+
+	
+
+
+func _on_ButtonCancel_pressed():
+	$ButtonFromCSV/csvOptions.hide()
 	pass # Replace with function body.
 
 
-func _on_ButtonYes_pressed():
-	$ButtonFromCSV/csvHeadings.hide()
-	sheet.csvImport(csvPath,true)
-
-
-func _on_ButtonNo_pressed():
-	$ButtonFromCSV/csvHeadings.hide()
-	sheet.csvImport(csvPath)
-	
+func _on_ButtonOk_pressed():
+	var optionButton = $ButtonFromCSV/csvOptions/VBoxContainer/Delimeter/OptionButton
+	var headings = $ButtonFromCSV/csvOptions/VBoxContainer/hasHeadings/CheckBoxHeadings.pressed
+	var delimeter = optionButton.get_item_text(optionButton.get_selected_id())
+	sheet.csvImport(csvPath,headings,delimeter)
+	$ButtonFromCSV/csvOptions.hide()

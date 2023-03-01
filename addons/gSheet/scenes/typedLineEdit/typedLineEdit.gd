@@ -16,7 +16,7 @@ onready var optionButton : OptionButton = null
 var dataFromTexDialog : ConfirmationDialog = null
 var hoverColor : Color
 var optionMode = false
-var previousText = ""
+#var previousText = ""
 var sheet = null
 var par
 
@@ -138,11 +138,12 @@ func createLineEdit():
 func _on_typedLineEdit_text_changed(new_text : String) -> void:
 #	print(new_text)
 	
-	if new_text == previousText:
-		text = new_text
-		return
+	#if new_text == previousText:
+	#	text = new_text
+	#	print("boop")
+	#	return
 	
-	previousText = new_text
+	#previousText = new_text
 	
 	if is_instance_valid(preview):
 		setChildrenVisible(false)
@@ -173,7 +174,8 @@ func _on_typedLineEdit_text_changed(new_text : String) -> void:
 				parseDict(new_text)
 		
 		if new_text.find("http") == 0:
-			texturefromURL(new_text)
+			if new_text.count("png") or new_text.count("jpg") or new_text.count("bmp") or new_text.count("tga"):
+				texturefromURL(new_text)
 		
 		elif new_text.is_abs_path():
 			parsePath(new_text)

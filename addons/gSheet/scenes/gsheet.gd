@@ -75,3 +75,25 @@ func getRowsAsArrayExcludeEmptyColumns() -> Array:
 		
 		
 	return ret
+	
+func getAsDict() -> Dictionary:
+	var ret = data.duplicate()
+	ret.erase("meta")
+	var ret2 = {}
+	
+	for key in ret.keys():
+		var retEntry = {}
+		var empty = true
+		for value in ret[key]:
+			if !ret[key][value].empty():
+				if !ret2.has(key):
+					ret2[key] = {}
+				
+				ret2[key][value] = ret[key][value]
+				empty = false
+			
+		if empty:
+			ret.erase(key)
+	
+	return ret2
+	

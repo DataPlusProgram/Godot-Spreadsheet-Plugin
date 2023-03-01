@@ -10,8 +10,8 @@ var customStyleSide= null
 var saveFlag = false
 var serializeFlag = true
 var updateSizingsFlag = false
-var initialColumns =1#12
-var initialRows = 2#20
+var initialColumns =5#12
+var initialRows = 5#20
 
 var numRows = 0
 var numCols = 0
@@ -247,7 +247,7 @@ func addColumn(title : String,emitSignal : bool = true,idx : int = -1) -> HSplit
 				y.set_meta("cellId",[x,yIdx])
 	
 	
-	
+	undoStack.append({"action":"deleteCol","id":idx })
 	
 	updateSizingsFlag = true
 	if emitSignal:
@@ -372,20 +372,27 @@ func lineEditNew() -> LineEdit:
 	return line
 
 func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> void:
-	
 	if side != null:
 		createSideCell(side.get_child_count())
 	
-	for c in cols.size():
+	
+	if addToUndoStack:
+		if idx == -1:
+			print(numRows)
+			undoStack.append({"action":"deleteRow","id":numRows })
+		else:
+			undoStack.append({"action":"deleteRow","id":idx-1 })
+			print(idx-1)
+	
+	for c in cols.size():#
 		var col = cols[c]
 		var lineEdit : LineEdit = createRowCell(c,numRows)
 		
-		if idx == -1:
+		if idx == -1:#we just add lineEdit to vbox
 			col.add_child(lineEdit)
 			cells[c].append(lineEdit)
-			undoStack.append({"action":"deleteRow","id":c })
 		else:
-			col.add_child_below_node(col.get_child(idx-1),lineEdit)
+			col.add_child_below_node(col.get_child(idx-1),lineEdit)#we add line edit as child at correct index
 			cells[c].insert(idx,lineEdit)
 			#lineEdit.set_meta("cellId",[c,idx])
 		
@@ -404,7 +411,7 @@ func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> vo
 			
 			
 	
-	numRows += 1
+	
 	
 	if idx != -1:
 		for cIdx in cols.size():
@@ -412,13 +419,15 @@ func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> vo
 			for y in range(idx,numRows):
 				colo.get_child(y).set_meta("cellId",[cIdx,y])
 	
+	numRows += 1
 	
 	if emitSignal:
 		serializeFlag = true
-		#emit_signal("dictChanged",serializeData())
+		
 		
 	if addToUndoStack:
 		pass
+	
 
 
 func createRowCell(colNum : int,rowNum : int) -> LineEdit:
@@ -488,13 +497,20 @@ func cellChanged(caller):
 		topCellChanged(caller)
 		return
 	
-
-	if !autoGrow:
-		return
+	
+	
 	var col = id[0]
 	var row = id[1]
 	
+	
+	if col == cols.size()-1:
+		updateLastColWidth()
 
+	if !autoGrow:
+		return
+	
+	
+		
 	if col == cols.size()-1:
 		addColumn("")
 		
@@ -754,7 +770,7 @@ func textToDataConfirm(caller,text):
 
 	cells[0][0].grab_focus()
 	updateSizingsFlag = true
-
+	undoStack.clear()
 
 
 func getCategories(data):
@@ -1063,7 +1079,7 @@ var a
 var b
 
 var loadThread
-func csvImport(path,headings=false):
+func csvImport(path,headings=false,delimeter = ","): 
 	blankSheet()
 	a = OS.get_system_time_msecs()
 	var file = File.new()
@@ -1073,7 +1089,7 @@ func csvImport(path,headings=false):
 	
 	var i = 0
 	
-	data = CSVparse(file)
+	data = CSVparse(file,delimeter)
 	
 	
 	var numRows : int = data.size()
@@ -1097,12 +1113,14 @@ func csvImport(path,headings=false):
 	
 	threadAdd([numRows,numCols,data])
 	#print(b-a)
+	undoStack.clear()
 	cells[0][0].grab_focus()
 	updateSizings()
+	
 
 
 
-func CSVparse(file):
+func CSVparse(file,delimeter = ","):
 	var data = []
 	var headingCount = 0
 	var input = getLineAlt(file)
@@ -1121,7 +1139,7 @@ func CSVparse(file):
 		while i < line.length():
 			var chara = line[i]
 			
-			if chara != ",":
+			if chara != delimeter:
 				if chara == "\"":
 					var outer = getStringOuterSimple(line.substr(i+1,-1))
 					runningString += outer
@@ -1228,6 +1246,7 @@ func updateSizings(var delay = true):
 		top.get_parent().rect_position.x = initialTopX + widestSideCell - 62#+ widestSideCell#+ widestSideCell
 	#corner.rect_size.x = widestSideCell
 	get_parent().rect_position.x = widestSideCell+7
+	updateLastColWidth()
 
 	
 
@@ -1252,15 +1271,18 @@ func save():
 	file.store_line(to_json(var2str(data)))
 
 func loadFromFile(path:String) -> void:
-	print("loading from file")
-	var data = ResourceLoader.load(path).data
-	var numR = data.size()-1
-	var numC = -1#data[0].size()
 	
-	for k in data.keys():
-		if k != "meta":
-			numC = data[k].size()
-			break
+	var filePathLabel = $"../../../Label"
+	filePathLabel.text = path
+	
+	var data = ResourceLoader.load(path).data
+	#var numR = data.size()-1
+	#var numC = -1#data[0].size()
+	
+	#for k in data.keys():
+	#	if k != "meta":
+	#		numC = data[k].size()
+	#		break
 	
 	
 	dataIntoSpreadsheet(data)
@@ -1318,8 +1340,8 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 	var cat : Array = meta["colNames"]#arr.pop_front()# getCategories(dict)
 	
 	
-	var numCat : int = cat.size()
-	var numRow : int= arr.size()-1#exclude meta
+	var numCat : int = max(5,cat.size())
+	var numRow : int= max(5,arr.size()-1)#exclude meta
 
 	
 	resize(numRow,numCat)
@@ -1339,7 +1361,7 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 		cols[key].set_meta("enumPrefix",enumColsPrefix[key])
 		#breakpoint
 	
-	for i in numCat:
+	for i in cat.size():
 		colsTop[i].get_child(0).text = String(cat[i])
 	
 	for i in rowOrder.size():
@@ -1398,7 +1420,7 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 	if meta.has("sheetWidth"):
 		baseSplit.rect_min_size.x = meta["sheetWidth"]
 
-	
+	undoStack.clear()
 	updateSizingsFlag=true
 	serializeFlag = true
 	
@@ -1423,7 +1445,7 @@ func cellsDebug():
 func deleteCurRow():
 	if curRow != -1:
 		cells[curCol][curRow].release_focus()
-		deleteRow(curRow)
+		deleteRow(curRow,true,true)
 
 
 func deleteCurCol():
@@ -1510,7 +1532,7 @@ func deleteCol(cIdx,dictChange = true,addToRedoStack = true):
 		#emit_signal("dictChanged",serializeData())
 	
 
-func deleteRow(rIdx,dictChange = true):
+func deleteRow(rIdx,dictChange,storeUndo):
 	if numRows <= 1:
 		return
 	
@@ -1524,8 +1546,9 @@ func deleteRow(rIdx,dictChange = true):
 	for cIdx in cols.size():
 		var c = cols[cIdx]
 		actionDict["data"].append(c.get_child(rIdx).text)
-		
-	undoStack.append(actionDict)
+	
+	if storeUndo:
+		undoStack.append(actionDict)
 	
 	for cIdx in cols.size():
 		var c = cols[cIdx]
@@ -1560,6 +1583,7 @@ func deleteRow(rIdx,dictChange = true):
 		serializeFlag = true
 	var tt = curRow%numRows
 	cells[curCol][curRow%numRows].grab_focus()
+	
 
 func popHsplit(hsplit):
 	
@@ -1598,7 +1622,7 @@ func resize(r : int,c : int) -> void:
 		var dif = numRows - r
 		
 		for i in dif:
-			deleteRow(numRows-1,false)
+			deleteRow(numRows-1,false,false)
 	else:
 		setNumRows(r,false)
 		
@@ -1621,7 +1645,9 @@ func undo():
 	if actionName == "moveColumnRight":
 		moveColLeft(actionDict["from"],false)
 	if actionName == "deleteRow":
-		deleteRow(actionDict["id"])
+		deleteRow(actionDict["id"],true,false)
+	if actionName == "deleteCol":
+		deleteCol(actionDict["id"],true,false)
 	
 func actionAddColumn(colName,colIdx,oldData,colTitles):
 	if oldData.empty():
@@ -1768,4 +1794,24 @@ func blankSheet():
 		colsTop[colIdx].get_parent().split_offset = 0
 		colsTop[colIdx].get_parent().rect_min_size.x = 0
 		
+	undoStack.clear()
 		
+		
+func getWidestColumn(cIdx) -> int:
+	var widest = -INF
+	
+	var lastCol = cols[cIdx].get_children()
+	for i in lastCol:
+		if i.rect_size.x > widest:
+			widest = i.rect_size.x
+				
+	return widest
+
+func setColumnWidth(cIdx,width):
+	var lastCol = cols[cIdx].get_children()
+	for i in lastCol:
+		i.rect_min_size.x = width
+	
+func updateLastColWidth():
+	var w = getWidestColumn(cols.size()-1)
+	setColumnWidth(cols.size()-1,w)
