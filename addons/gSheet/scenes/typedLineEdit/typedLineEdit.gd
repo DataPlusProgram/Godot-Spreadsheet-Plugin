@@ -36,7 +36,7 @@ func _ready():
 func getOptionRectSize():
 	return optionButton.rect_size
 
-func activateOptionMode(values,enumStr):
+func activateOptionMode(enumValues,enumStr):
 	
 	if is_instance_valid(optionButton):
 		optionButton.queue_free()
@@ -75,19 +75,43 @@ func activateOptionMode(values,enumStr):
 	
 	var t = optionButton.get("custom_styles/normal")
 	
-	set_meta("enumStrToValue",values)
+	set_meta("enumStrToValue",enumValues)
+	#var test = values.keys() #values wont get placed in their correct order unless keys is sorted by mapped index instead of alphanumeric order
 	
-	for i in values.keys():
-		if i == "@DUMMY":
-			valueIndex[i] = optionButton.get_item_count()
-			i = ""
-		else:
-			valueIndex[i] = optionButton.get_item_count()
-		optionButton.add_item(i)
+	var valueSorted = {}
+	var keysSorted = enumValues.values()
+	keysSorted.sort()
+	
+	#for i in values.values():
+	#	valueSorted[]
+	
+	for i in keysSorted:
+		for key in enumValues.keys():
+			if enumValues[key] == i:
+				var tuple = [key,i]
+				
+				if key != "@DUMMY":
+					optionButton.add_item(key)
+				else:
+					optionButton.add_item("")
+					
+				#valueIndex[key] = i
+				valueIndex[key] = optionButton.get_item_count()-1
+				
+#	for i in values.keys():
+#
+#		var optionButtonItemCount = optionButton.get_item_count()
+#
+#		if i == "@DUMMY":
+#			valueIndex[i] = optionButtonItemCount
+#			i = ""
+#		else:
+#			valueIndex[i] = optionButtonItemCount
+#		optionButton.add_item(i)
 		
 
 	var existingText = enumStr
-	var keys = values.keys()
+	var keys = enumValues.keys()
 	text = ""
 	#print("keys:",keys)
 	
@@ -108,14 +132,14 @@ func activateOptionMode(values,enumStr):
 		var index = valueIndex[post]
 		optionButton.select(index)
 		
-		value = values[post]
+		value = enumValues[post]
 	#	print("set indexa to:",index)
 		
 	else:
 		var index = valueIndex["@DUMMY"]
 		print(index)
 		optionButton.select(index)
-		value = values["@DUMMY"]
+		value = enumValues["@DUMMY"]
 	#	print("set indexb to:",index)
 		
 	
@@ -392,21 +416,25 @@ func isInternalSupportedAudio(ext):
 func index_pressed(index):
 	emit_signal("index_pressed",self,index,get_meta("index"))
 	
-
+ 
 
 func _on_OptionButton_item_selected(index):
 	var txt = optionButton.get_item_text(index)
-	var dict = get_meta("enumStrToValue")
+	var enumStrToValue = get_meta("enumStrToValue")
 	
+	print(txt)
 	
-	
-	if dict["@DUMMY"] == index:
-		value = ""
+	if txt == "":
+		value = enumStrToValue["@DUMMY"]
+		text = ""
+		return
+	#if enumStrToValue[txt] == index: 
+	#	value = ""
 		text = ""
 		return
 	
-	value = dict[txt]
-	text = ""
+	value = enumStrToValue[txt]
+	text = "" 
 	par.serializeFlag = true
 
 
@@ -419,8 +447,7 @@ func setData(dict : Dictionary) -> void:
 		_on_typedLineEdit_text_changed(text)
 		
 	if dict["type"] == "enum":
-		var enumStr = dict["enumStr"]
-		activateOptionMode(data,enumStr)
+		activateOptionMode(data,dict["enumStr"])
 	return
 	
 func getData(dict):

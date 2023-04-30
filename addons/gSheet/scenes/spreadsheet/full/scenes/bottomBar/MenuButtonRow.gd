@@ -12,7 +12,8 @@ func _ready():
 
 func _on_item_pressed(id):
 	if id == 0:
-		sheet.addRow(true,-1,true)
+		
+		sheet.addRow(true,sheet.curRow,true)
 		sheet.updateSizings()
 	elif id == 1:
 		sheet.deleteCurRow()

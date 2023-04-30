@@ -10,16 +10,16 @@ func _ready():
 	popup.connect("id_pressed", self, "_on_item_pressed")
 
 
-
 func _on_item_pressed(id):
 	if id == 0:
-		var curCol = sheet.curCol
-		sheet.addColumn("",true,curCol,true)
-		sheet.updateSizings()
-	elif id == 1:
-		#var actionDict = {"action":"delectColumn","index":cIdx}
-		sheet.deleteCurCol()
-	elif id == 2:
-		sheet.moveCurColRight()
-	elif id == 3:
 		sheet.moveColLeft(sheet.curCol)
+		
+	if id == 1:
+		sheet.moveColRight(sheet.curCol)
+		
+	if id == 2:
+		pass
+	
+	if id == 3: 
+		pass
+	

@@ -26,10 +26,4 @@ size_flags_horizontal = 3
 size_flags_vertical = 3
 follow_focus = true
 
-[node name="HBoxContainer" type="HBoxContainer" parent="Control/ScrollContainer"]
-
 [connection signal="draw" from="Control" to="Control" method="_on_Control_draw"]
-[connection signal="focus_entered" from="Control/ScrollContainer/col 0/VBoxContainer/row 0" to="Control/ScrollContainer/col 0/VBoxContainer/row 0" method="_on_typedLineEdit_focus_entered"]
-[connection signal="focus_exited" from="Control/ScrollContainer/col 0/VBoxContainer/row 0" to="Control/ScrollContainer/col 0/VBoxContainer/row 0" method="_on_typedLineEdit_focus_exited"]
-[connection signal="focus_entered" from="Control/ScrollContainer/col 0/VBoxContainer/row 1" to="Control/ScrollContainer/col 0/VBoxContainer/row 1" method="_on_typedLineEdit_focus_entered"]
-[connection signal="focus_exited" from="Control/ScrollContainer/col 0/VBoxContainer/row 1" to="Control/ScrollContainer/col 0/VBoxContainer/row 1" method="_on_typedLineEdit_focus_exited"]

@@ -18,3 +18,4 @@ func dictChanged(dict):
 
 func setTitle(text):
 	$VBoxContainer/Label.text = text
+

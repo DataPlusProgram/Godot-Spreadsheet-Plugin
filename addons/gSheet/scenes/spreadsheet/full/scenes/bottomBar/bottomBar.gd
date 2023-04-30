@@ -54,12 +54,6 @@ func _on_ButtonSave_pressed():
 	dialog.rect_size =  Vector2(600,600)
 	dialog.popup_centered_ratio()
 	
-	#var data = sheet.serializeData()
-	#var res = load("res://addons/gSheet/scenes/gsheet.gd").new()
-	#res.data = data
-#	ResourceSaver.save("res://dbg/savedFormat2.tres",res)
-	
-	#sheetGlobal.saveNodeAsScene(self,"res://dbg/sScen.tscn")
 
 func saveSheet(string):
 	var data = sheet.serializeData()
@@ -104,7 +98,10 @@ func _on_Button_pressed():
 	sheet.serializeData()
 
 
-
+func _input(event):
+	if event.get_class() != "InputEventKey":
+		return
+	
 	
 
 
@@ -119,3 +116,61 @@ func _on_ButtonOk_pressed():
 	var delimeter = optionButton.get_item_text(optionButton.get_selected_id())
 	sheet.csvImport(csvPath,headings,delimeter)
 	$ButtonFromCSV/csvOptions.hide()
+
+
+func _on_ButtonSearch_pressed():
+	$SearchDiag/WindowDialog.popup_centered()
+	$SearchDiag/WindowDialog/MarginContainer/v/h/LineEdit.grab_focus()
+
+
+
+
+
+func _on_ButtonFind_pressed():
+	var ret = sheet.grabFocusIfTextFound($SearchDiag/WindowDialog/MarginContainer/v/h/LineEdit.text)
+	if ret == false:
+		$SearchDiag/WindowDialog/MarginContainer/v/Label.text = "Match not found"
+	else:
+		$SearchDiag/WindowDialog/MarginContainer/v/Label.text = ""
+
+
+
+func _on_ButtonAddRowAbove_pressed():
+	var idx = sheet.curRow
+	sheet.addRow(true,idx,true,sheet.curCol).grab_focus()
+	sheet.curRow = idx
+	sheet.curCol = 0
+
+
+func _on_ButtonAddRowBelow_pressed():
+	var idx = sheet.curRow+1
+	sheet.addRow(true,idx,true,sheet.curCol).grab_focus()
+	#sheet.curRow = idx
+	#sheet.curCol = 0
+
+
+func _on_TextureButton_pressed():
+	var idx = sheet.curCol
+	sheet.addColumn("",true,idx).grab_focus()
+	#sheet.curRow = 0
+	#sheet.curCol = idx
+
+
+func _on_TextureButton2_pressed():
+	var idx = sheet.curCol+1
+	sheet.addColumn("",true,idx).grab_focus()
+	#sheet.curRow = 0
+	#sheet.curCol = idx
+
+
+func _on_TextureButtonColClose_pressed():
+	sheet.deleteCurCol()
+
+
+func _on_TextureButtonDeleCurRow_pressed():
+	sheet.deleteCurRow()
+
+
+
+
+

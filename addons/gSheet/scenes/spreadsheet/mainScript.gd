@@ -125,10 +125,11 @@ func _ready():
 	
 	
 	for i in neededRows:
-		addRow(false)
+		addRow(false,i)
 	
 
 func _process(delta):
+	
 	
 	if saveFlag:
 		data = serializeData()
@@ -155,18 +156,19 @@ func _process(delta):
 
 
 	
-func addColumn(title : String,emitSignal : bool = true,idx : int = -1) -> HSplitContainer:
+func addColumn(title : String,emitSignal : bool = true,idx : int = -1,addToUndoStack : bool= false) -> LineEdit:
 	var hSplit = HSplitContainer.new()
 	var vBox = VBoxContainer.new()
 	var initial = false
-	
+	var ret = null
 	if numCols == 0:
 		initial = true
 		
 	
 	hSplit.set_script(load("res://addons/gSheet/scenes/spreadsheet/hSplitSignal.gd"))
 	
-	hSplit.set_meta("index",numCols)
+	#hSplit.set_meta("index",numCols)
+	hSplit.set_meta("index",idx)
 	hSplit.connect("hDraw",self,"hDrawMain")
 	hSplit.add_child(vBox)
 	hSplit.connect("hDrag",self,"hDragged")
@@ -179,21 +181,27 @@ func addColumn(title : String,emitSignal : bool = true,idx : int = -1) -> HSplit
 		hSplit.set("custom_icons/grabber",sheetStyle.customGrabber)
 	
 	
+	if idx == -1:
+		idx = 0
+	
 	if top != null:
 		if title == "":
 			if idx == -1:
-				addHeadingColumn(numCols,idx)
+				addHeadingColumn(numCols,numCols)
 			else:
-				addHeadingColumn(numCols,idx)
+				addHeadingColumn(numCols,numCols)
 		else:
 			if idx==-1:
-				addHeadingColumn(title,idx)
+				addHeadingColumn(title,numCols)
 			else:
-				addHeadingColumn(title,idx)
+				addHeadingColumn(title,numCols)
 		
 	if initial:
 		baseSplit = hSplit
 		scrollContainer.add_child(hSplit)
+		hSplit.show_behind_parent = true
+		scrollContainer.move_child(hSplit,0)
+		
 		
 	else:
 		if idx ==-1:
@@ -214,7 +222,7 @@ func addColumn(title : String,emitSignal : bool = true,idx : int = -1) -> HSplit
 		
 	for i in numRows:#for each row
 		var cellNode : LineEdit= createRowCell(numCols,i)#create the row cell
-		
+		ret = cellNode
 		
 		if idx == numCols or idx == -1:
 			cellNode.size_flags_horizontal = 0
@@ -247,17 +255,20 @@ func addColumn(title : String,emitSignal : bool = true,idx : int = -1) -> HSplit
 				y.set_meta("cellId",[x,yIdx])
 	
 	
-	undoStack.append({"action":"deleteCol","id":idx })
+	if addToUndoStack:
+		undoStack.append({"action":"deleteCol","id":idx })
 	
 	updateSizingsFlag = true
 	if emitSignal:
 		serializeFlag = true
 		#emit_signal("dictChanged",serializeData())
 	
-	return hSplit
+	return ret
 		
 
 func addToLatestHSplit(par,node):
+	
+	
 	
 	for i in par.get_children():
 		if i.get_class() == "HSplitContainer":
@@ -267,15 +278,23 @@ func addToLatestHSplit(par,node):
 				addToLatestHSplit(i,node)
 				
 func addToIdxHSplit(par,node,idx,count):
+
 	
+		
+
 	if idx == -1:
 		#var hs = HSplitContainer.new()
 		var scroll = baseSplit.get_parent()
 		scroll.remove_child(baseSplit)
 		var hs = node
 		scroll.add_child(hs)
+		scroll.move_child(hs,0)
 		hs.add_child(baseSplit)
+		
+		
+		
 		baseSplit = hs
+		
 		#hs.add_child(node)
 		return
 		
@@ -295,8 +314,9 @@ func addToIdxHSplit(par,node,idx,count):
 				addToIdxHSplit(i,node,idx,count+1)
 
 func poolTick():
-	if nodePool.size() < 20000:
-		nodePool.append(createLineEdit("",true,true))
+	if nodePool.size() < 10000:
+		for i in 5:
+			nodePool.append(createLineEdit("",true,true))
 
 
 
@@ -371,30 +391,53 @@ func lineEditNew() -> LineEdit:
 	line.par = self
 	return line
 
-func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> void:
-	if side != null:
-		createSideCell(side.get_child_count())
+func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack : bool = false,colToGrab :int = 0) -> LineEdit:
+	
+	var ret : LineEdit  = null
+	var sideCell : LineEdit
+	
+	if side != null:#this creates the side cellth
+		sideCell = createSideCell(idx)
+		rowsSide.erase(sideCell)
+		rowsSide.insert(max(idx,0),sideCell)
+		sideCell.set_meta("index",max(idx,0))
+		side.move_child(sideCell,max(idx,0))
+		
+		for i in side.get_child_count():
+			side.get_child(i).set_meta("index",i)
 	
 	
 	if addToUndoStack:
 		if idx == -1:
-			print(numRows)
-			undoStack.append({"action":"deleteRow","id":numRows })
+			undoStack.append({"action":"deleteRow","id":0 })
 		else:
-			undoStack.append({"action":"deleteRow","id":idx-1 })
-			print(idx-1)
+			undoStack.append({"action":"deleteRow","id":idx})
 	
-	for c in cols.size():#
-		var col = cols[c]
+		if sideCell != null:
+				rowsSide.erase(sideCell)
+				rowsSide.insert(max(idx,0),sideCell)
+				sideCell.set_meta("index",max(idx,0))
+	
+	for c in cols.size():#for each column vbox
+		var col : VBoxContainer = cols[c]
 		var lineEdit : LineEdit = createRowCell(c,numRows)
+		if c == colToGrab:
+			ret = lineEdit
 		
 		if idx == -1:#we just add lineEdit to vbox
+			var t  = side
 			col.add_child(lineEdit)
-			cells[c].append(lineEdit)
+			cells[c].insert(0,lineEdit)
+			col.move_child(lineEdit,0)
+			
+			
+			
 		else:
-			col.add_child_below_node(col.get_child(idx-1),lineEdit)#we add line edit as child at correct index
+			col.add_child(lineEdit)
+			col.move_child(lineEdit,idx)
+			
 			cells[c].insert(idx,lineEdit)
-			#lineEdit.set_meta("cellId",[c,idx])
+
 		
 		if c == cols.size()-2:
 			lineEdit.size_flags_horizontal = 1
@@ -413,11 +456,13 @@ func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> vo
 	
 	
 	
-	if idx != -1:
-		for cIdx in cols.size():
-			var colo = cols[cIdx]
-			for y in range(idx,numRows):
-				colo.get_child(y).set_meta("cellId",[cIdx,y])
+	#if idx != -1 and idx != 0:
+	for cIdx in cols.size():
+		var colo = cols[cIdx]
+		for y in range(max(idx,0),numRows+1):
+			colo.get_child(y).set_meta("cellId",[cIdx,y])
+			
+
 	
 	numRows += 1
 	
@@ -428,8 +473,8 @@ func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack = false) -> vo
 	if addToUndoStack:
 		pass
 	
-
-
+	
+	return ret
 func createRowCell(colNum : int,rowNum : int) -> LineEdit:
 	
 	var lineEdit : LineEdit = fetchLineEdit("",true,true)
@@ -484,13 +529,18 @@ func hDrawMain(caller):
 	col.rect_min_size.x = cols[colIdx].rect_size.x 
 	
 func cellChanged(caller):
-	#breakpoint
 	saveFlag = true
 	updateSizingsFlag = true
 	
 	if !caller.has_meta("cellId"):
-		return
-	
+		if rowsSide.has(caller):
+			var count = 0
+			for i in rowsSide:
+				count+=1
+				if i!= caller:
+					if i.text == caller.text:
+						caller.text += "_duplicate" + String(count)
+						
 	var id = caller.get_meta("cellId")
 	
 	if id == null:
@@ -609,12 +659,15 @@ func addHeadingColumn(text,idx=-1):
 		return hSplit
 	
 
-func createSideCell(txt : int) -> void:
+func createSideCell(txt : int,autoAdd : bool = true) -> LineEdit:
 	var heading : LineEdit = fetchLineEdit(txt,true,false)
+	heading.connect("focus_entered",self,"sideFocusCellFocus")
 	heading.set("custom_styles/normal",customStyleSide)
 	heading.set_meta("index",txt)
-	side.add_child(heading) 
-	rowsSide.append(heading)
+	if autoAdd:
+		side.add_child(heading) 
+		rowsSide.append(heading)
+	return heading
 
 func exitFocusCell(cell):
 	
@@ -1101,7 +1154,6 @@ func csvImport(path,headings=false,delimeter = ","):
 		
 	a = OS.get_system_time_msecs()
 	resize(numRows,numCols)
-	print(OS.get_system_time_msecs() - a)
 	for idx in cats.size():
 		colsTop[idx].get_child(0).setData({"type":"str","data":cats[idx]})
 		
@@ -1236,6 +1288,7 @@ func updateSizings(var delay = true):
 	var widestSideCell = 0
 
 	for rowIdx in rowsSide.size():
+		var x = cells[0][rowIdx].rect_size.y
 		rowsSide[rowIdx].rect_size.y = cells[0][rowIdx].rect_size.y
 		rowsSide[rowIdx].rect_min_size.y = cells[0][rowIdx].rect_size.y
 
@@ -1255,6 +1308,8 @@ func setNumRows(var num : int,changeSingal : bool = true):
 	
 	for i in diff:
 		addRow(changeSingal)
+		
+		
 
 
 func setNumCols(var num : int,var changeSignal : bool = true) -> void:
@@ -1305,15 +1360,15 @@ func serializeData():
 	dict["meta"]["sheetWidth"] = baseSplit.rect_size.x
 	
 	for idx in cols.size():
-		var i = cols[idx]
-		if i.has_meta("enum"):#if column is enum
-			var enums = i.get_meta("enum")
-			var enumPrefix = i.get_meta("enumPrefix")
+		var col = cols[idx]
+		if col.has_meta("enum"):#if column is enum
+			var enums = col.get_meta("enum")
+			var enumPrefix = col.get_meta("enumPrefix")
 			dict["meta"]["enumColumns"][idx] = enums
 			dict["meta"]["enumColumnsPrefix"][idx] = enumPrefix
 		
 		
-		dict["meta"]["splitSize"][idx] = i.get_parent().split_offset
+		dict["meta"]["splitSize"][idx] = col.get_parent().split_offset
 		
 	for y in numRows:
 		var rowDict = {}
@@ -1323,7 +1378,7 @@ func serializeData():
 			var columnName = colsTop[x].get_child(0).text
 			rowDict[columnName] = cell.value
 
-		var row = rowsSide[y]
+		var row = rowsSide[y] 
 		dict[rowsSide[y].text] = rowDict#if there a duplicate row keys a problem will occur here
 			
 			
@@ -1345,7 +1400,7 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 
 	
 	resize(numRow,numCat)
-	
+
 	var rowOrder : Array = meta["rowOrder"]
 	var enumCols : Dictionary = meta["enumColumns"]
 	var enumColsPrefix : Dictionary = meta["enumColumnsPrefix"]
@@ -1367,7 +1422,9 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 	for i in rowOrder.size():
 		rowsSide[i].text = rowOrder[i]
 	
-	for x in cat.size():#for each category
+	
+	
+	for x in cat.size():#for each category(column)
 		
 		for y in rowOrder.size():
 			var cell : LineEdit = cells[x][y]
@@ -1391,9 +1448,13 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 			
 			
 			
-			cell.setData({"type":"str","data":newText})
+			
+			var wasEnum = false
 			
 			var textAsEnum = "@DUMMY"
+			
+			
+			
 			if enumCols.has(x):#if an enum col
 				if newText != "":
 					for key in enumCols[x].keys():#for each key of enum
@@ -1402,8 +1463,12 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 							break
 				
 				cell.setData({"type":"enum","data":enumCols[x],"enumStr":textAsEnum})
+				wasEnum = true
 				
-			
+		
+			if !wasEnum:
+				cell.setData({"type":"str","data":newText})
+				
 			baseSplit.update()
 			
 			if y == 0:
@@ -1432,15 +1497,20 @@ func cellsDebug():
 			#cells[i][j].text = String(i) + "," + String(j)
 			cells[i][j].text = String(cells[i][j].get_meta("cellId"))
 	
+	
+	#for i in side.get_child_count():
+	#	side.get_child(i).text = String(i)
+	#	side.get_child(i).text =  side.get_child(
+	
 	for idx in colsTop.size():
 		var cell = colsTop[idx].get_child(0)
 		cell.text = var2str(colsTop[idx].get_child(0).get_meta("index"))#String(idx)
 		#if colsTop[idx].get_child(0).has_meta("enum"):
 		#	cell.text = var2str(colsTop[idx].get_child(0).get_meta("enum"))
 		
-	#for idx in rowsSide.size():
-	#	var cell = rowsSide[idx]
-	#	cell.text = String(idx)
+	for idx in rowsSide.size():
+		var cell = rowsSide[idx]
+		cell.text = String(idx) + "j"
  
 func deleteCurRow():
 	if curRow != -1:
@@ -1551,37 +1621,32 @@ func deleteRow(rIdx,dictChange,storeUndo):
 		undoStack.append(actionDict)
 	
 	for cIdx in cols.size():
-		var c = cols[cIdx]
-		c.get_child(rIdx).queue_free()
+		var column :VBoxContainer = cols[cIdx]
+		column.get_child(rIdx).queue_free()
 		cells[cIdx][rIdx].queue_free()
 		cells[cIdx].remove(rIdx)
 		
 		for i in range(rIdx+1,numRows):
-			var oldIdx = c.get_child(i).get_meta("cellId")
+			var oldIdx = column.get_child(i).get_meta("cellId")
 			var stro = String(i-1)
-			#rowsSide[i].text = String(i-1)
 			actionDict["rowTitle"] = rowsSide[i].text
-			c.get_child(i).set_meta("cellId",[oldIdx[0],oldIdx[1]-1])
+			column.get_child(i).set_meta("cellId",[oldIdx[0],oldIdx[1]-1])
 	
 	
 	numRows -= 1
 	rowsSide[rIdx].queue_free()
 	rowsSide[rIdx].get_parent().remove_child(rowsSide[rIdx])
+
 	rowsSide.remove(rIdx)
-	
+
+	cols[0]
 	if numRows == 0:
 		return
-	
-	#if curRow == numRows:
-	#	curRow -= 1
-	
-	
-	
 	
 	
 	if dictChange:
 		serializeFlag = true
-	var tt = curRow%numRows
+	
 	cells[curCol][curRow%numRows].grab_focus()
 	
 
@@ -1663,8 +1728,8 @@ func actionAddColumn(colName,colIdx,oldData,colTitles):
 	
 
 	
-func insertColumn(title,id):
-	addColumn(title,false,id)
+func insertColumn(title,id,addToUndoStack=false):
+	addColumn(title,false,id,addToUndoStack)
 
 func actionAddRow(index,data,rowTitle):
 	addRow(false,index)
@@ -1793,7 +1858,20 @@ func blankSheet():
 		
 		colsTop[colIdx].get_parent().split_offset = 0
 		colsTop[colIdx].get_parent().rect_min_size.x = 0
-		
+	
+	
+	for i in rowsSide.size():
+		rowsSide[i].text = String(i)
+	
+	for i in colsTop.size():
+		colsTop[i].get_child(0).text = String(i)
+	
+	for y in numRows:
+		for x in numCols:
+			var cell =cells[x][y]
+			cell.text = ""
+			cell.value = ""
+	
 	undoStack.clear()
 		
 		
@@ -1815,3 +1893,24 @@ func setColumnWidth(cIdx,width):
 func updateLastColWidth():
 	var w = getWidestColumn(cols.size()-1)
 	setColumnWidth(cols.size()-1,w)
+
+func grabFocusIfTextFound(text):
+	for x in cells:
+		for y in x:
+			var txt = y.text
+			if txt.find(text) != -1:
+				y.grab_focus()
+				return true
+				
+	
+	return false
+			
+func sideFocusCellFocus():
+	var owner = get_focus_owner()
+	
+	if !owner.has_meta("index"):
+		return
+	
+	curCol = 0
+	curRow = owner.get_meta("index")
+	
