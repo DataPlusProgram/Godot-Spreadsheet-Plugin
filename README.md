@@ -1,7 +1,7 @@
 # Godot-Spreadsheet-Plugin
 A custom resource that displays data as a Spreadsheet
 
-![image](https://user-images.githubusercontent.com/62811101/220409893-8ce629d5-c8fb-4e7e-b1f5-2052a4b82ce4.png)
+![image](https://i.imgur.com/MTGfIyX.png)
 
 This plugin mimics a spreadsheet interface so you easily edit data
 
