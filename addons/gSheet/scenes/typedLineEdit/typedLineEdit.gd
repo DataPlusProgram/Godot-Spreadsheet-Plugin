@@ -117,7 +117,7 @@ func activateOptionMode(enumValues,enumStr):
 	
 	if existingText.find(".") == -1:
 		optionButton.select(valueIndex["@DUMMY"])
-		
+		value = enumValues["@DUMMY"]
 		if existingText.is_valid_integer():
 			optionButton.queue_free()
 			_on_typedLineEdit_text_changed(existingText)

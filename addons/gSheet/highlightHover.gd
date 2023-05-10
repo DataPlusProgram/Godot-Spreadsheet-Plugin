@@ -1,7 +1,8 @@
 extends TextureButton
 
 export var makeDarkToggleTexture = false
-
+export var amt = .4
+export var tint = Color(1,1,1)
 var normalTexture
 var pressedTexture
 var normalDark
@@ -11,7 +12,7 @@ var darkBright
 
 func _ready():
 	
-	var amt = 0
+	
 	var p = self
 	while(true):
 		
@@ -54,6 +55,7 @@ func brighten(texture : Texture,amt : float):
 	for x in image.get_width():
 		for y in image.get_height():
 			var pix = image.get_pixel(x,y)
+			pix *= tint
 			var post = pix + Color(amt,amt,amt,0)
 			image.set_pixel(x,y,post)
 			

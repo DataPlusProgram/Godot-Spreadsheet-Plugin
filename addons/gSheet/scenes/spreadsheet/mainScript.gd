@@ -473,7 +473,6 @@ func addRow(emitSignal : bool = true,idx : int =-1,addToUndoStack : bool = false
 	if addToUndoStack:
 		pass
 	
-	
 	return ret
 func createRowCell(colNum : int,rowNum : int) -> LineEdit:
 	
@@ -543,8 +542,10 @@ func cellChanged(caller):
 						
 	var id = caller.get_meta("cellId")
 	
+	
 	if id == null:
-		topCellChanged(caller)
+		if get_node("../../").name == "side":
+			topCellChanged(caller)
 		return
 	
 	
@@ -646,6 +647,7 @@ func addHeadingColumn(text,idx=-1):
 		if idx !=-1:
 			var oldChild = sheetGlobal.getChildOfClass(root,"HSplitContainer")
 			colsTop.insert(idx,vBox)
+			
 			root.remove_child(oldChild)
 			hSplit.add_child(oldChild)
 			

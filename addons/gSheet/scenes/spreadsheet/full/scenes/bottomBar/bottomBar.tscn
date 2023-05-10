@@ -4,13 +4,13 @@
 [ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/bottomBar.gd" type="Script" id=2]
 [ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/MenuButtonCol.gd" type="Script" id=3]
 [ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/MenuButtonRow.gd" type="Script" id=4]
-[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-down.svg" type="Texture" id=5]
-[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-left .svg" type="Texture" id=6]
-[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-up.svg" type="Texture" id=7]
+[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-right.png" type="Texture" id=5]
+[ext_resource path="res://addons/gSheet/scenes/assets/close-rectangle.png" type="Texture" id=6]
+[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-up.png" type="Texture" id=7]
 [ext_resource path="res://addons/gSheet/highlightHover.gd" type="Script" id=8]
-[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-right.svg" type="Texture" id=9]
-[ext_resource path="res://addons/gSheet/scenes/assets/search.svg" type="Texture" id=10]
-[ext_resource path="res://addons/gSheet/scenes/assets/close-rectangle.svg" type="Texture" id=11]
+[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-left .png" type="Texture" id=9]
+[ext_resource path="res://addons/gSheet/scenes/assets/search.png" type="Texture" id=10]
+[ext_resource path="res://addons/gSheet/scenes/assets/arrow-square-down.png" type="Texture" id=11]
 [ext_resource path="res://addons/gSheet/scenes/spreadsheet/full/scenes/bottomBar/MoveMenu.gd" type="Script" id=12]
 
 [node name="HBoxContainer2" type="HBoxContainer"]
@@ -214,7 +214,7 @@ script = ExtResource( 4 )
 
 [node name="h" type="HBoxContainer" parent="."]
 margin_left = 163.0
-margin_right = 284.0
+margin_right = 272.0
 margin_bottom = 24.0
 
 [node name="Label" type="Label" parent="h"]
@@ -225,25 +225,28 @@ text = "Rows:"
 
 [node name="ButtonAddRowAbove" type="TextureButton" parent="h"]
 margin_left = 41.0
-margin_right = 65.0
+margin_right = 61.0
 margin_bottom = 24.0
 hint_tooltip = "Insert row above"
 texture_normal = ExtResource( 7 )
+script = ExtResource( 8 )
 
 [node name="ButtonAddRowBelow" type="TextureButton" parent="h"]
-margin_left = 69.0
-margin_right = 93.0
+margin_left = 65.0
+margin_right = 85.0
 margin_bottom = 24.0
 hint_tooltip = "Insert row below"
-texture_normal = ExtResource( 5 )
+texture_normal = ExtResource( 11 )
 script = ExtResource( 8 )
 
 [node name="TextureButtonDeleCurRow" type="TextureButton" parent="h"]
-margin_left = 97.0
-margin_right = 121.0
+margin_left = 89.0
+margin_right = 109.0
 margin_bottom = 24.0
 hint_tooltip = "Delete current row"
-texture_normal = ExtResource( 11 )
+texture_normal = ExtResource( 6 )
+script = ExtResource( 8 )
+tint = Color( 1, 0, 0, 1 )
 
 [node name="Button" type="Button" parent="."]
 visible = false
@@ -261,8 +264,8 @@ margin_bottom = 24.0
 text = "load"
 
 [node name="h2" type="HBoxContainer" parent="."]
-margin_left = 288.0
-margin_right = 432.0
+margin_left = 276.0
+margin_right = 408.0
 margin_bottom = 24.0
 
 [node name="Label" type="Label" parent="h2"]
@@ -273,35 +276,40 @@ text = "Columns:"
 
 [node name="TextureButton" type="TextureButton" parent="h2"]
 margin_left = 64.0
-margin_right = 88.0
-margin_bottom = 24.0
-texture_normal = ExtResource( 6 )
-
-[node name="TextureButton2" type="TextureButton" parent="h2"]
-margin_left = 92.0
-margin_right = 116.0
+margin_right = 84.0
 margin_bottom = 24.0
 texture_normal = ExtResource( 9 )
+script = ExtResource( 8 )
+
+[node name="TextureButton2" type="TextureButton" parent="h2"]
+margin_left = 88.0
+margin_right = 108.0
+margin_bottom = 24.0
+texture_normal = ExtResource( 5 )
+script = ExtResource( 8 )
 
 [node name="TextureButtonColClose" type="TextureButton" parent="h2"]
-margin_left = 120.0
-margin_right = 144.0
+margin_left = 112.0
+margin_right = 132.0
 margin_bottom = 24.0
-texture_normal = ExtResource( 11 )
+texture_normal = ExtResource( 6 )
+script = ExtResource( 8 )
+tint = Color( 1, 0, 0, 1 )
 
 [node name="MoveMenu" type="MenuButton" parent="."]
-margin_left = 436.0
-margin_right = 483.0
+margin_left = 412.0
+margin_right = 459.0
 margin_bottom = 24.0
 text = "Move"
 items = [ "Column move left", null, 0, false, false, 0, 0, null, "", false, "Column move right", null, 0, false, false, 1, 0, null, "", false ]
 script = ExtResource( 12 )
 
 [node name="ButtonSearch" type="TextureButton" parent="."]
-margin_left = 487.0
-margin_right = 511.0
+margin_left = 463.0
+margin_right = 483.0
 margin_bottom = 24.0
 texture_normal = ExtResource( 10 )
+script = ExtResource( 8 )
 
 [connection signal="file_selected" from="ButtonFromCSV/FileDialog" to="." method="_on_FileDialog_file_selected"]
 [connection signal="pressed" from="ButtonFromCSV/csvOptions/VBoxContainer2/HBoxContainer/ButtonOk" to="." method="_on_ButtonOk_pressed"]

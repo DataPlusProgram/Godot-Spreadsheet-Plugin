@@ -137,7 +137,15 @@ func _on_ButtonFind_pressed():
 
 func _on_ButtonAddRowAbove_pressed():
 	var idx = sheet.curRow
-	sheet.addRow(true,idx,true,sheet.curCol).grab_focus()
+	
+	
+	#if idx == -1: idx = 0
+	
+	var ret = sheet.addRow(true,idx,true,sheet.curCol)
+	
+	if ret != null:
+		ret.grab_focus()
+		
 	sheet.curRow = idx
 	sheet.curCol = 0
 
