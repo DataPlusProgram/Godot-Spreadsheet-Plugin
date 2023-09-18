@@ -11,10 +11,10 @@ static func saveNodeAsScene(node,path = "res://dbg/"):
 	packedScene.pack(node)
 	
 	if path.find(".tscn") != -1:
-		print("saving as:",path)
+		#print("saving as:",path)
 		ResourceSaver.save(path,packedScene)
 	else:
-		print("saving as:",path+node.name+".tscn")
+		#print("saving as:",path+node.name+".tscn")
 		ResourceSaver.save(path+node.name+".tscn",packedScene)
 		
 		

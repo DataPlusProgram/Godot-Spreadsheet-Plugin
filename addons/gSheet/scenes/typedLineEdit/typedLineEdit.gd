@@ -116,11 +116,19 @@ func activateOptionMode(enumValues,enumStr):
 	#print("keys:",keys)
 	
 	if existingText.find(".") == -1:
-		optionButton.select(valueIndex["@DUMMY"])
-		value = enumValues["@DUMMY"]
+		
+		if valueIndex.has(existingText):
+			optionButton.select(valueIndex[existingText])
+			value = enumValues[existingText]
+			
+		else:
+			optionButton.select(valueIndex["@DUMMY"])
+			value = enumValues["@DUMMY"]
+		
 		if existingText.is_valid_integer():
 			optionButton.queue_free()
 			_on_typedLineEdit_text_changed(existingText)
+			
 		return
 	
 	
@@ -131,15 +139,15 @@ func activateOptionMode(enumValues,enumStr):
 		#var index = keys.find(post)
 		var index = valueIndex[post]
 		optionButton.select(index)
-		
+		text = post
 		value = enumValues[post]
 	#	print("set indexa to:",index)
 		
 	else:
 		var index = valueIndex["@DUMMY"]
-		print(index)
 		optionButton.select(index)
 		value = enumValues["@DUMMY"]
+		
 	#	print("set indexb to:",index)
 		
 	
@@ -434,7 +442,8 @@ func _on_OptionButton_item_selected(index):
 		return
 	
 	value = enumStrToValue[txt]
-	text = "" 
+	#text = ""
+	text = txt
 	par.serializeFlag = true
 
 

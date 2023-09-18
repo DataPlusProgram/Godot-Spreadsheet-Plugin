@@ -648,8 +648,9 @@ func addHeadingColumn(text,idx=-1):
 			var oldChild = sheetGlobal.getChildOfClass(root,"HSplitContainer")
 			colsTop.insert(idx,vBox)
 			
-			root.remove_child(oldChild)
-			hSplit.add_child(oldChild)
+			if oldChild != null:
+				root.remove_child(oldChild)
+				hSplit.add_child(oldChild)
 			
 			for i in range(idx+1,colsTop.size()):
 				colsTop[i].get_child(0).set_meta("index",i+1)
@@ -662,7 +663,14 @@ func addHeadingColumn(text,idx=-1):
 	
 
 func createSideCell(txt : int,autoAdd : bool = true) -> LineEdit:
-	var heading : LineEdit = fetchLineEdit(txt,true,false)
+	var text = String(txt)
+
+	for i in rowsSide:
+		if i.text == text:
+			text += "_duplicate"
+			break
+	
+	var heading : LineEdit = fetchLineEdit(text,true,false)
 	heading.connect("focus_entered",self,"sideFocusCellFocus")
 	heading.set("custom_styles/normal",customStyleSide)
 	heading.set_meta("index",txt)
@@ -980,15 +988,11 @@ func getValue(text):
 	
 	
 func getTuples(text):
-	var flag = false
-	if text.find("Player 2 start") != -1:
-		flag = true
-	
+
 	var ret = []
 	
 	var sub = text.split(":","")
 	
-	#if flag:
 	var arr = []
 	var content = strToArray(text)
 	
@@ -1410,9 +1414,15 @@ func dataIntoSpreadsheet(arr : Dictionary) -> void:
 	setNumCols(numCat,false)
 	setNumRows(numRow,false)
 	
+	
+	var a =  rowsSide.size()
+	var b = rowOrder.size()
+	
+	
+	
 	var runningSplit = 0
 	
-
+	
 	for key in enumCols.keys():
 		cols[key].set_meta("enum",enumCols[key])
 		cols[key].set_meta("enumPrefix",enumColsPrefix[key])
@@ -1916,3 +1926,11 @@ func sideFocusCellFocus():
 	curCol = 0
 	curRow = owner.get_meta("index")
 	
+func getColData(var colIdx):
+	
+	var ret : Array = []
+	
+	for i in cols[colIdx].get_children():
+		ret.append(i.value)
+	
+	return ret
