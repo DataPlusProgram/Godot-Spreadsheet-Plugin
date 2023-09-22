@@ -531,14 +531,14 @@ func cellChanged(caller):
 	saveFlag = true
 	updateSizingsFlag = true
 	
-	if !caller.has_meta("cellId"):
-		if rowsSide.has(caller):
-			var count = 0
-			for i in rowsSide:
-				count+=1
-				if i!= caller:
-					if i.text == caller.text:
-						caller.text += "_duplicate" + String(count)
+#	if !caller.has_meta("cellId"):
+#		if rowsSide.has(caller):
+#			var count = 0
+#			for i in rowsSide:
+#				count+=1
+#				if i!= caller:
+#					if i.text == caller.text:
+#						caller.text += "_duplicate" + String(count)
 						
 	var id = caller.get_meta("cellId")
 	
@@ -665,10 +665,10 @@ func addHeadingColumn(text,idx=-1):
 func createSideCell(txt : int,autoAdd : bool = true) -> LineEdit:
 	var text = String(txt)
 
-	for i in rowsSide:
-		if i.text == text:
-			text += "_duplicate"
-			break
+#	for i in rowsSide:
+#		if i.text == text:
+#			text += "_duplicate"
+#			break
 	
 	var heading : LineEdit = fetchLineEdit(text,true,false)
 	heading.connect("focus_entered",self,"sideFocusCellFocus")

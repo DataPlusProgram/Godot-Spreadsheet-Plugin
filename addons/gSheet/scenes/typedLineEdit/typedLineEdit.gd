@@ -113,7 +113,6 @@ func activateOptionMode(enumValues,enumStr):
 	var existingText = enumStr
 	var keys = enumValues.keys()
 	text = ""
-	#print("keys:",keys)
 	
 	if existingText.find(".") == -1:
 		

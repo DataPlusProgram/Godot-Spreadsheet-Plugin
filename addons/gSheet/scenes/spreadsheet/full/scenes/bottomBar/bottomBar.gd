@@ -138,37 +138,40 @@ func _on_ButtonFind_pressed():
 func _on_ButtonAddRowAbove_pressed():
 	var idx = sheet.curRow
 	
-	
 	#if idx == -1: idx = 0
 	
-	var ret = sheet.addRow(true,idx,true,sheet.curCol)
+	var focus = sheet.addRow(true,idx,true,sheet.curCol)
 	
-	if ret != null:
-		ret.grab_focus()
+	if focus != null:
+		focus.grab_focus()
 		
-	sheet.curRow = idx
-	sheet.curCol = 0
+
 
 
 func _on_ButtonAddRowBelow_pressed():
 	var idx = sheet.curRow+1
-	sheet.addRow(true,idx,true,sheet.curCol).grab_focus()
-	#sheet.curRow = idx
-	#sheet.curCol = 0
+	var focus = sheet.addRow(true,idx,true,sheet.curCol)
+	
+	if focus != null:
+		focus.grab_focus()
 
 
 func _on_TextureButton_pressed():
 	var idx = sheet.curCol
-	sheet.addColumn("",true,idx).grab_focus()
-	#sheet.curRow = 0
-	#sheet.curCol = idx
+	var focus = sheet.addColumn("",true,idx)
+	
+	if focus != null:
+		sheet.addColumn("",true,idx).grab_focus()
+
 
 
 func _on_TextureButton2_pressed():
 	var idx = sheet.curCol+1
-	sheet.addColumn("",true,idx).grab_focus()
-	#sheet.curRow = 0
-	#sheet.curCol = idx
+	var focus = sheet.addColumn("",true,idx)
+	
+	if focus != null:
+		focus.grab_focus()
+
 
 
 func _on_TextureButtonColClose_pressed():
